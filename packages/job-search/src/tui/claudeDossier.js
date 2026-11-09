@@ -6,10 +6,20 @@
 
 import { createDossierStream } from './dossierStream.js';
 
-// Locate the `claude` binary. Throws if not installed.
-export async function resolveClaudePath() {
-  const { execSync } = await import('child_process');
-  return execSync('which claude', { encoding: 'utf-8' }).trim();
+// Locate the Claude Code CLI. CLAUDE_BIN names it explicitly; otherwise `claude`, then
+// `claude-personal` — a per-account wrapper (one CLAUDE_CONFIG_DIR per account) used
+// where there is no bare `claude`. Throws if none is installed.
+export async function resolveClaudePath(env = process.env) {
+  const { execFileSync } = await import('child_process');
+  for (const name of [env.CLAUDE_BIN, 'claude', 'claude-personal']) {
+    if (!name) continue;
+    try {
+      return execFileSync('which', [name], { encoding: 'utf-8', env }).trim();
+    } catch {
+      /* not on PATH — try the next name */
+    }
+  }
+  throw new Error('Claude Code CLI not found (CLAUDE_BIN, claude, claude-personal)');
 }
 
 // Env for nested claude sessions — drop the markers that block nesting.
