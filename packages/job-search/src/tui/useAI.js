@@ -104,7 +104,7 @@ export function useAI(resume) {
         claudePath = await resolveClaudePath();
       } catch {
         setError(
-          'Claude Code CLI not found. Install it: npm install -g @anthropic-ai/claude-code'
+          'Claude Code CLI not found (tried CLAUDE_BIN, claude, claude-personal). Install it: npm install -g @anthropic-ai/claude-code'
         );
         return;
       }
